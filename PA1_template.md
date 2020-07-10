@@ -117,6 +117,17 @@ ggplot(avg_steps_interval,aes(x=interval, y=steps))+geom_line() + labs(title="Av
 
 ![](PA1_template_files/figure-html/unnamed-chunk-7-1.png)<!-- -->
 
+Max Steps in an interval
+
+```r
+filter(avg_steps_interval,steps == max(steps))
+```
+
+```
+##   interval    steps
+## 1      835 206.1698
+```
+
 ## Imputing missing values
 ### Summary of current dataset
 
@@ -292,5 +303,5 @@ Plotting
 ggplot(avg_steps,aes(x=interval, y=steps)) + geom_line() + facet_grid(day_type ~ .) + labs(title="Average Steps in Intervals on Weekdays and Weekends",x="Intervals",y="Average Steps")
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-16-1.png)<!-- -->
+![](PA1_template_files/figure-html/unnamed-chunk-17-1.png)<!-- -->
 On weekdays average number of steps are higher than average number of steps on weekends

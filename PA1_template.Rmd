@@ -43,6 +43,11 @@ avg_steps_interval <- aggregate(steps~interval, data,mean)
 ggplot(avg_steps_interval,aes(x=interval, y=steps))+geom_line() + labs(title="Average Daily Activity Pattern", x="Intervals", y="Number of Steps")
 ```
 
+Max Steps in an interval
+```{r}
+filter(avg_steps_interval,steps == max(steps))
+```
+
 ## Imputing missing values
 ### Summary of current dataset
 ```{r}
