@@ -4,22 +4,96 @@ output:
   html_document:
     keep_md: true
 ---
-
-
-## Loading and preprocessing the data
-
-
-
+## Required imports
+```{r}
+library(ggplot2)
+library(dplyr)
+```
+## Loading and preprocessing the data  
+Reading the csv file after unzipping and converting into Dates
+```{r}
+data <- read.csv(unzip("activity.zip"), na.strings = "NA", stringsAsFactors = FALSE)
+str(data)
+data$date <- as.Date(data$date, "%Y-%m-%d")
+head(data,10)
+```
 ## What is mean total number of steps taken per day?
+### Total number of steps taken per day
+```{r}
+total_steps <- aggregate(steps~date, data, sum)
+head(total_steps,10)
+```
+### Histogram of total steps taken per day
+```{r}
+ggplot(total_steps, aes(steps)) + geom_histogram(binwidth = 500) + labs(title="Histogram of Total Steps taken per day",x="Steps", y="Count")
+```  
 
-
-
+### Mean of Total steps
+```{r}
+mean(total_steps$steps, na.rm = TRUE)
+```
+### Median of Total steps
+```{r}
+median(total_steps$steps, na.rm = TRUE)
+```
 ## What is the average daily activity pattern?
-
-
+### Average of steps in intervals
+```{r}
+avg_steps_interval <- aggregate(steps~interval, data,mean)
+ggplot(avg_steps_interval,aes(x=interval, y=steps))+geom_line() + labs(title="Average Daily Activity Pattern", x="Intervals", y="Number of Steps")
+```
 
 ## Imputing missing values
+### Summary of current dataset
+```{r}
+summary(data)
+```  
+From the summary it can be seen that 'steps' column has missing values
+Replacing them with average of that particular interval in new dataset
+```{r}
+new_data <- data
+head(new_data)
+```
+Getting indices of rows which have NA values
+```{r}
+na_index <- which(is.na(data$steps))
+```
+Replacing with average of that particular interval
+```{r}
+for (i in na_index){
+        new_data[i,1] <- avg_steps_interval[which(avg_steps_interval$interval == new_data[i,3]),2]
+}
+## Checking if all NA values are replaced
+summary(data)
+summary(new_data)
+```
+### Differences between mean and median of both the datasets
+```{r}
+new_total_steps = aggregate(steps~date, new_data, sum)
+mean(new_total_steps$steps)
+median(new_total_steps$steps)
+```  
 
-
-
-## Are there differences in activity patterns between weekdays and weekends?
+## Are there differences in activity patterns between weekdays and weekends?  
+### Creating new factor variables with 2 levels "Weekday" and "Weekend"
+```{r}
+new_data <- new_data %>% mutate(weekday = weekdays(data[,2]))
+head(new_data)
+tail(new_data)
+```
+Giving levels based on weekday
+```{r}
+new_data <- new_data %>% mutate(day_type = ifelse(weekday %in% c("Saturday", "Sunday"),"Weekend","Weekday"))
+head(new_data)
+tail(new_data)
+```
+Aggregating based on intervals and "Weekday" or "Weekend"
+```{r}
+avg_steps <- aggregate(steps~interval+day_type, new_data,mean)
+head(avg_steps)
+```
+Plotting
+```{r}
+ggplot(avg_steps,aes(x=interval, y=steps)) + geom_line() + facet_grid(day_type ~ .) + labs(title="Average Steps in Intervals on Weekdays and Weekends",x="Intervals",y="Average Steps")
+```
+On weekdays average number of steps are higher than average number of steps on weekends
